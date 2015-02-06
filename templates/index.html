@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="{{ url_for('static',filename='img/laser-logo.png')}}" />
+
+<title>Prévisulaiser les taches de découpe laser</title>
+
+<!-- Bootstrap core CSS -->
+<link href="{{ url_for('static',filename='lib/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<link href="{{ url_for('static',filename='lib/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet">
+
+<!-- split panes -->
+<link href="{{ url_for('static',filename='lib/split-pane/split-pane.css')}}" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
+
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#"> <img alt="Découpe laser" title="Découpe laser" height="24" src="{{ url_for('static',filename='img/laser-logo-inverted.png')}}">
+				</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					>
+					<li class="active"><a href="http://carrefour-numerique.cite-sciences.fr/fablab/wiki/doku.php?id=machines:decoupe_laser:0_utilisation" target="_blank"> <i class="fa fa-life-ring"></i> Aide à l'utilisation de la decoupeuse laser
+					</a></li>
+				</ul>
+
+				<ul class="nav navbar-nav navbar-left">
+					<li class="active"><a href="#">Prévisulaiser les taches de découpe</a></li>
+					<!-- <li><a href="#">Archives</a></li> -->
+				</ul>
+
+			</div>
+		</div>
+	</nav>
+	<div id="main">
+		<!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
+		<div class="split-pane fixed-left">
+			<div class="split-pane-component" id="left-component">
+				<div id="tsf_info" class="panel panel-default">
+					<div class="panel-heading">Détail de la tache</div>
+					<div class="panel-body">
+						<em class="text-muted"> Sélectionner une tache</em>
+					</div>
+				</div>
+				<div id="spool_filter">
+					<div class="input-group">
+				      <input type="text" id="filter_txt" placeholder="Filtre par nom de tache" class="form-control" aria-label="...">
+				      <div class="input-group-btn">
+				        <button id="clear_filter_txt" type="button" class="btn btn-default" aria-expanded="false" title="Supprimer le filtre"><i class="fa fa-times"></i></button>
+				      </div><!-- /btn-group -->
+				    </div>
+				    <div id="sortby">
+				    	Trier par : 
+				    	<a href="#" sortby="name">Nom</a> &nbsp;
+				    	<a href="#" sortby="date">Date</a> &nbsp;
+				    </div>
+				</div>
+				<div id="spool_list_container">
+					<table id="spool_list" class="table table-condensed table-hover"></table>
+				</div>
+			</div>
+			<div class="split-pane-divider" id="my-divider"></div>
+			<div class="split-pane-component" id="right-component">
+				<div id="preview_picture"></div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="{{ url_for('static',filename='lib/obj.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/i18next-1.7.2.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/numeral/numeral.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/numeral/numeral.fr.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-helpers.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-util.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/bootstrap/js/bootstrap.min.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.bootstrap-growl.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.elevatezoom.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/split-pane/split-pane.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.sort.js')}}"></script>
+	<script>
+		function loadSpool() {
+			$.getJSON("/spool/list.json", function(data) {
+				$("#spool_list").html("");
+				for ( var i in data.tsf_list) {
+					var name = data.tsf_list[i].filename;
+					if ('JobName' in data.tsf_list[i].headers) {
+						name = data.tsf_list[i].headers.JobName
+					}
+					var tsf_row = $([ '<tr class="tsf"><td>', name, '(', data.tsf_list[i].sweight, ')', '</td><td width="32"><i class="fa fa-download text-muted"></i> <i class="fa fa-trash text-muted"></i></td></tr>' ].join(""));
+					var icons = $("<td width='32'/>")
+					tsf_row.prepend(icons);
+					if (data.tsf_list[i].headers.valid && (data.tsf_list[i].headers.bmp || data.tsf_list[i].headers.cut.length > 0)) {
+						icons.append(" <i class='fa fa-check-circle-o  text-success' title='Fichier valide'></i>");
+					} else {
+						icons.append(' <i class="fa-times-circle-o text-danger" title="Fichier invalide"></i>');
+						tsf_row.addClass("text-muted")
+					}
+					if (data.tsf_list[i].headers.bmp) {
+						icons.append(" <i class='fa fa-picture-o text-info' title='Gravure active'></i>");
+					} else {
+						icons.append(' <i class="fa fa-picture-o text-muted" title="Pas de gravure"></i>');
+					}
+					if (data.tsf_list[i].headers.cut && data.tsf_list[i].headers.cut.length > 0) {
+						icons.append(" <i class='fa fa-scissors text-info'title='" + data.tsf_list[i].headers.cut.length + " couleur(s) de découpe'></i>");
+					} else {
+						icons.append(' <i class="fa fa-scissors text-muted"  title="Pas de découpe"></i>');
+					}
+
+					data.tsf_list[i].display_name = name;
+					tsf_row.data("tsf", data.tsf_list[i]);
+					$("#spool_list").append(tsf_row);
+				}
+				sortSpool();
+				filterSpool()
+				listResize()
+			});
+		}
+		var currentsort = "name";
+		function sortSpool(sort) {
+			if(sort == null){
+				sort = currentsort;
+			}
+			currentsort = sort;
+			if (sort == 'date') {
+				$("#spool_list .tsf").sortElements(function(a, b) {
+					return $(a).data('tsf').date < $(b).data('tsf').date ? 1 : -1;
+				});
+			} else { //sortby name
+				$("#spool_list .tsf").sortElements(function(a, b) {
+					
+					return $.trim($(a).data('tsf').display_name) > $.trim($(b).data('tsf').display_name) ? 1 : -1;
+				});
+			}
+		}
+
+		function listResize() {
+			$("#spool_list_container").css({
+				'max-height' : $(window).height() - $(".navbar-fixed-top").height() - $("#tsf_info").height() - $("#spool_filter").height() - 10
+			});
+		}
+		function filterSpool() {
+			var filter = $.trim($("#filter_txt").val()).toLowerCase();
+			console.log("Filtering",filter)
+			if (filter == "") {
+				$("#spool_list .tsf").show();
+			} else {
+				$("#spool_list .tsf").each(function() {
+					if ($(this).data("tsf").filename.toLowerCase().indexOf(filter) > -1 || ('JobName' in $(this).data("tsf").headers && $(this).data("tsf").headers.JobName.toLowerCase().indexOf(filter) > -1)) {
+						$(this).show();
+					} else {
+						$(this).hide();
+					}
+				});
+
+			}
+
+		}
+
+		function windowResize() {
+			$("#main").height($(window).height() - $(".navbar").height());
+			$("#preview_picture").height($(window).height() - $(".navbar").height()) - 10;
+			listResize();
+		}
+		$(window).resize(windowResize);
+
+		$(function() {
+			windowResize();
+			$('div.split-pane').splitPane();
+			$("#spool_list").on("click", ".tsf", function(e) {
+				$(".zoomContainer").remove();
+				e.preventDefault();
+				var data = $(this).data('tsf');
+				$("#tsf_info .panel-body").render('tsf_info', data);
+				if (data.headers.valid && data.headers.bmp || data.headers.cut.length > 0) {
+					var img_url = [ '/tsf/preview/', data.directory, '/', data.filename, '.svg' ].join("");
+					var img = $([ '<img src="', img_url, '" data-zoom-image=', img_url, ' />' ].join('')).on('load', function() {
+						console.log('loaded', this);
+					}).css({
+						'max-width' : '95%',
+						'max-height' : '99%',
+						'margin' : 'auto'
+					});
+					$("#preview_picture").html(img);
+					if (data.headers.bmp) {
+						img.elevateZoom({
+							zoomType : "inner",
+							cursor : "crosshair",
+							scrollZoom : true,
+							containLensZoom : true,
+							responsive : true
+						});
+					}
+				} else {
+					alert('Ce fichier ne semble pas valide');
+				}
+				listResize();
+			});
+			$("#sortby").change(function() {
+				sortSpool();
+			});
+			$("#filter_txt").keyup(function() {
+				filterSpool();
+			}).change(function() {
+				filterSpool();
+			});
+			$("#clear_filter_txt").click(function(e){
+				e.preventDefault();
+				$("#filter_txt").val("");
+				filterSpool();
+			});
+			$("#sortby a").click(function(e){
+				e.preventDefault();
+				sortSpool($(this).attr('sortby'));
+			});
+			loadSpool();
+
+			var eventSource = new EventSource('/subscribe');
+			 eventSource.onmessage = function(e) {
+			 console.log(e.data);
+			 }
+		})
+	</script>
+</body>
+</html>

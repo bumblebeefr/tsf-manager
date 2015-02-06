@@ -1,0 +1,93 @@
+body {
+	overflow: hidden;
+}
+
+.navbar-brand > img {
+
+    display: inline-block;
+
+}
+
+#preview_picture {
+	text-align: center;
+	line-height: 100%;
+	vertical-align: middle;
+}
+
+#preview_picture img {
+	background-color: #FFF;
+	box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+#main {
+	margin-top: 50px;
+}
+
+.split-pane-divider {
+	/*background: #aaa;*/
+}
+
+#left-component {
+	width: 30em;
+	box-shadow: 3px 0px 3px rgba(0, 0, 0, 0.5);
+}
+
+#my-divider {
+	left: 30em; /* Same as left component width */
+	width: 5px;
+}
+#sortby{
+	margin-top:3px;
+	font-size:8pt;
+	text-align:right;	
+}
+#right-component {
+	left: 30em; /* Same as left component width */
+	margin-left: 5px; /* Same as divider width */
+}
+
+.zoomContainer {
+	z-index: 1000;
+}
+
+#spool_list_container{
+	overflow:auto;
+}
+#spool_list {
+	font-size: 8.5pt;
+	padding: 0.8em;
+}
+
+#spool_list tr{
+	cursor:pointer;
+	white-space : nowrap;
+}
+
+
+#preview_picture {
+	margin: 5px;
+}
+.text-muted{
+	color:#AAA;
+}
+
+#tsf_info{
+	background-color:rgba(255,255,255,0.8);
+	font-size:8pt;
+	margin:3px;
+}
+
+#tsf_info .dl-horizontal dt{
+	width:120px;
+}
+
+#tsf_info  .dl-horizontal dd{
+	margin-left:125px;	
+}
+
+#tsf_info .colorbox{
+	display:inline-block;
+	width:1em;
+	height:1em;
+	border:solid 1px #666;
+}
