@@ -23,7 +23,7 @@ headers_transfo = {
     'Size': lambda x: {'width': float(x[0]), 'height': float(x[1])},
     'MaterialGroup': lambda x: x[0],
     'MaterialName': lambda x: x[0],
-    'JobName': lambda x: x[0],
+    'JobName': lambda x: x[0].decode('iso-8859-1'),
     'JobNumber': lambda x: int(x[0]),
     'Resolution': lambda x: int(x[0]),
     'Cutline': lambda x: x[0],
@@ -194,7 +194,7 @@ def extract_preview(tsf_file, headers):
 
 
 def extract_preview2(tsf_file, headers, svg_path, jpg_path):
-    logging.debug(extract_svg(tsf_file, headers))
+    #logging.debug(extract_svg(tsf_file, headers))
     engrave_img = None
     try:
         with open(tsf_file, "r") as f:
