@@ -26,7 +26,7 @@ def str_weight(weight):
     while weight > 1024:
         weight = 1.0 * weight / 1024
         i += 1
-    logging.debug(weight)
+    # logging.debug(weight)
     return "%0.1f%s" % (weight, ("o", "Ko", "Mo", "Go", "To")[i])
 
 
@@ -76,8 +76,8 @@ class TsfFile:
                 self._headers = parser.parse_headers2(self.full_path)
                 mkdir(path.join(PREVIEW_DIR, self.creation_date.strftime("%Y-%m-%d")))
                 with open(header_file, 'w+') as f:
-                    simplejson.dump(self._headers, f)
-
+                        simplejson.dump(self._headers, f)
+                        
         return self._headers
 
     def preview(self):
