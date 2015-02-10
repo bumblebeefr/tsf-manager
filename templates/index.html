@@ -78,6 +78,10 @@
 			</div>
 			<div class="split-pane-divider" id="my-divider"></div>
 			<div class="split-pane-component" id="right-component">
+				<div id="preview_picture_loading" class="alert alert-info" role="alert" >
+					<i class="fa fa-cog fa-spin"></i>
+					Chargement de la prévisualisation du Job.
+				</div>
 				<div id="preview_picture"></div>
 			</div>
 		</div>
@@ -100,49 +104,75 @@
 	<script src="{{ url_for('static',filename='lib/split-pane/split-pane.js')}}"></script>
 	<script src="{{ url_for('static',filename='lib/jquery.sort.js')}}"></script>
 	<script>
+		numeral.language('fr');
+
+		function jqEscape(str){
+			return str.replace(/([ !"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g,'\\\\$1');
+		}
+		
 		function loadSpool() {
 			$.getJSON("/spool/list.json", function(data) {
 				$("#spool_list").html("");
+				var checksums = {}
 				for ( var i in data.tsf_list) {
 					var name = data.tsf_list[i].filename;
 					if ('JobName' in data.tsf_list[i].headers) {
 						name = data.tsf_list[i].headers.JobName
 					}
-					var tsf_row = $([ '<tr class="tsf"><td>', name, '(', data.tsf_list[i].sweight, ')', '</td><td width="32"><i class="fa fa-download text-muted"></i> <i class="fa fa-trash text-muted"></i></td></tr>' ].join(""));
-					var icons = $("<td width='32'/>")
-					tsf_row.prepend(icons);
-					if (data.tsf_list[i].headers.valid && (data.tsf_list[i].headers.bmp || data.tsf_list[i].headers.cut.length > 0)) {
-						icons.append(" <i class='fa fa-check-circle-o  text-success' title='Fichier valide'></i>");
-					} else {
-						icons.append(' <i class="fa-times-circle-o text-danger" title="Fichier invalide"></i>');
-						tsf_row.addClass("text-muted")
+					var id = name+data.tsf_list[i].checksum;
+					checksums[id] = true;
+					if($("#"+jqEscape(id)).length ==0){
+						var tsf_row = $([ '<tr class="tsf"><td>', name, '(', data.tsf_list[i].sweight, ')', '</td><td width="32"><i class="fa fa-download text-muted"></i> <i class="fa fa-trash text-muted"></i></td></tr>' ].join(""));
+						tsf_row.attr('id',id);
+						var icons = $("<td width='32'/>")
+						tsf_row.prepend(icons);
+						if (data.tsf_list[i].headers.valid && (data.tsf_list[i].headers.bmp || data.tsf_list[i].headers.cut.length > 0)) {
+							icons.append(" <i class='fa fa-check-circle-o  text-success' title='Fichier valide'></i>");
+						} else {
+							icons.append(' <i class="fa-times-circle-o text-danger" title="Fichier invalide"></i>');
+							tsf_row.addClass("text-muted")
+						}
+						if (data.tsf_list[i].headers.bmp) {
+							icons.append(" <i class='fa fa-picture-o text-info' title='Gravure active'></i>");
+						} else {
+							icons.append(' <i class="fa fa-picture-o text-muted" title="Pas de gravure"></i>');
+						}
+						if (data.tsf_list[i].headers.cut && data.tsf_list[i].headers.cut.length > 0) {
+							icons.append(" <i class='fa fa-scissors text-info'title='" + data.tsf_list[i].headers.cut.length + " couleur(s) de découpe'></i>");
+						} else {
+							icons.append(' <i class="fa fa-scissors text-muted"  title="Pas de découpe"></i>');
+						}
+	
+						data.tsf_list[i].display_name = name;
+						tsf_row.data("tsf", data.tsf_list[i]);
+						$("#spool_list").append(tsf_row);
 					}
-					if (data.tsf_list[i].headers.bmp) {
-						icons.append(" <i class='fa fa-picture-o text-info' title='Gravure active'></i>");
-					} else {
-						icons.append(' <i class="fa fa-picture-o text-muted" title="Pas de gravure"></i>');
-					}
-					if (data.tsf_list[i].headers.cut && data.tsf_list[i].headers.cut.length > 0) {
-						icons.append(" <i class='fa fa-scissors text-info'title='" + data.tsf_list[i].headers.cut.length + " couleur(s) de découpe'></i>");
-					} else {
-						icons.append(' <i class="fa fa-scissors text-muted"  title="Pas de découpe"></i>');
-					}
-
-					data.tsf_list[i].display_name = name;
-					tsf_row.data("tsf", data.tsf_list[i]);
-					$("#spool_list").append(tsf_row);
 				}
+ 				$("#spool_list tr.tsf").each(function(){
+					if(!($(this).attr('id') in checksums)){
+						$(this).remove();
+					}
+				}); 
 				sortSpool();
 				filterSpool()
 				listResize()
 			});
 		}
 		var currentsort = "name";
+		if (localStorage && 'currentsort' in localStorage) {
+			currentsort = localStorage['currentsort']
+		}
 		function sortSpool(sort) {
+			$("#sortby a").removeClass("selected");
+			
 			if(sort == null){
 				sort = currentsort;
 			}
 			currentsort = sort;
+			if (localStorage) {
+				localStorage['currentsort'] = sort;
+			}
+			$("#sortby a[sortby="+sort+"]").addClass("selected");
 			if (sort == 'date') {
 				$("#spool_list .tsf").sortElements(function(a, b) {
 					return $(a).data('tsf').date < $(b).data('tsf').date ? 1 : -1;
@@ -197,23 +227,28 @@
 					var img_url = [ '/tsf/preview/', data.directory, '/', data.filename, '.svg' ].join("");
 					var img = $([ '<img src="', img_url, '" data-zoom-image=', img_url, ' />' ].join('')).on('load', function() {
 						console.log('loaded', this);
+						$("#preview_picture_loading").hide();
 					}).css({
 						'max-width' : '95%',
 						'max-height' : '99%',
 						'margin' : 'auto'
 					});
+					$("#preview_picture_loading").show();
 					$("#preview_picture").html(img);
-					if (data.headers.bmp) {
+					/* if (data.headers.bmp) {
 						img.elevateZoom({
 							zoomType : "inner",
 							cursor : "crosshair",
 							scrollZoom : true,
 							containLensZoom : true,
+							zoomType : "lens",
+							lensShape : "round",
+							lensSize    : 300,
 							responsive : true
 						});
-					}
+					} */
 				} else {
-					alert('Ce fichier ne semble pas valide');
+					$("#preview_picture").render('tsf_invalid', data);
 				}
 				listResize();
 			});
@@ -235,11 +270,12 @@
 				sortSpool($(this).attr('sortby'));
 			});
 			loadSpool();
+			setInterval(loadSpool,10000);
 
-			var eventSource = new EventSource('/subscribe');
+/* 			var eventSource = new EventSource('/subscribe');
 			 eventSource.onmessage = function(e) {
 			 console.log(e.data);
-			 }
+			 } */
 		})
 	</script>
 </body>

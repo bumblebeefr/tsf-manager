@@ -41,6 +41,14 @@ body {
 	font-size:8pt;
 	text-align:right;	
 }
+
+#sortby a.selected{
+	font-weight:bold;
+	text-decoration:none;
+	color:#000;
+	cursor:	default;
+}
+
 #right-component {
 	left: 30em; /* Same as left component width */
 	margin-left: 5px; /* Same as divider width */
@@ -66,6 +74,13 @@ body {
 
 #preview_picture {
 	margin: 5px;
+}
+#tsf_invalid{
+	margin:25%;	
+}
+#preview_picture_loading{
+	margin:25%;	
+	display:none;
 }
 .text-muted{
 	color:#AAA;

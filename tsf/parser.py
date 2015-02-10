@@ -16,6 +16,8 @@ headers_re = {
     'JobName': re.compile('<JobName: (.*)>'),
     'JobNumber': re.compile('<JobNumber: ([0-9]*)>'),
     'Resolution': re.compile('<Resolution: ([0-9]*)>'),
+    'LayerParameter': re.compile('<LayerParameter: ([0-9]*);([0-9\.]*)>'),
+    'StampShoulder': re.compile('<StampShoulder: (.*)>'),
     'Cutline': re.compile('<Cutline: (.*)>'),
 }
 headers_transfo = {
@@ -26,6 +28,8 @@ headers_transfo = {
     'JobName': lambda x: x[0].decode('iso-8859-1'),
     'JobNumber': lambda x: int(x[0]),
     'Resolution': lambda x: int(x[0]),
+    'LayerParameter': lambda x: {'layers': int(x[0]), 'adjustment': float(x[1])},
+    'StampShoulder': lambda x: x[0],
     'Cutline': lambda x: x[0],
 }
 
@@ -101,6 +105,7 @@ def get_base64_img(tsf_buff, headers):
     if(m):
         with Image(blob="BM" + m.group(2)) as img:
             img.flip()
+            img.transform(resize='1920x1080>')
             img.format = 'jpg'
             return img.make_blob().encode("base64").replace('\n', '')
     else:
@@ -140,7 +145,18 @@ def parse_headers(tsf_file):
 def parse_headers2(tsf_file):
     try:
         with open(tsf_file, "r") as file:
-            headers = {}
+            headers = {
+                'ProcessMode': None,
+                'Size': {'width': 0, 'height': 0},
+                'MaterialGroup': None,
+                'MaterialName': None,
+                'JobName': None,
+                'JobNumber': 0,
+                'Resolution': 300,
+                'LayerParameter': {'layers': 1, 'adjustment': 0},
+                'StampShoulder': None,
+                'Cutline': [],
+            }
             headers['bmp'] = False
             colors = set()
             if(tsf_file.endswith(".tsf")):
@@ -184,7 +200,7 @@ def extract_preview(tsf_file, headers):
                         draw_polygon(draw, p.split(';'))
                     draw(img)
 
-                # img.transform(resize='1024x768>')
+                img.transform(resize='1920x1080>')
                 img.format = 'png'
                 img.save(filename=fp)
         return fp

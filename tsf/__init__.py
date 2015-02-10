@@ -74,10 +74,10 @@ class TsfFile:
                     self._headers = simplejson.load(f)
             else:
                 self._headers = parser.parse_headers2(self.full_path)
+                logging.debug(self._headers)
                 mkdir(path.join(PREVIEW_DIR, self.creation_date.strftime("%Y-%m-%d")))
                 with open(header_file, 'w+') as f:
-                        simplejson.dump(self._headers, f)
-                        
+                    simplejson.dump(self._headers, f)
         return self._headers
 
     def preview(self):
