@@ -1,55 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="{{ url_for('static',filename='img/laser-logo.png')}}" />
-
-<title>Prévisulaiser les taches de découpe laser</title>
-
-<!-- Bootstrap core CSS -->
-<link href="{{ url_for('static',filename='lib/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
-<link href="{{ url_for('static',filename='lib/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet">
-
-<!-- split panes -->
-<link href="{{ url_for('static',filename='lib/split-pane/split-pane.css')}}" rel="stylesheet">
-
-<!-- Custom styles for this template -->
-<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
-
-
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-</head>
-
-<body>
-
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="#"> <img alt="Découpe laser" title="Découpe laser" height="24" src="{{ url_for('static',filename='img/laser-logo-inverted.png')}}">
-				</a>
-			</div>
-			<div id="navbar" class="navbar-collapse collapse">
-				<ul class="nav navbar-nav navbar-right">
-					>
-					<li class="active"><a href="http://carrefour-numerique.cite-sciences.fr/fablab/wiki/doku.php?id=machines:decoupe_laser:0_utilisation" target="_blank"> <i class="fa fa-life-ring"></i> Aide à l'utilisation de la decoupeuse laser
-					</a></li>
-				</ul>
-
-				<ul class="nav navbar-nav navbar-left">
-					<li class="active"><a href="#">Prévisulaiser les taches de découpe</a></li>
-					<!-- <li><a href="#">Archives</a></li> -->
-				</ul>
-
-			</div>
-		</div>
-	</nav>
-	<div id="main">
+{% extends "layout.html" %}
+{% block main %}
 		<!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
 		<div class="split-pane fixed-left">
 			<div class="split-pane-component" id="left-component">
@@ -80,35 +30,19 @@
 			<div class="split-pane-component" id="right-component">
 				<div id="preview_picture_loading" class="alert alert-info" role="alert" >
 					<i class="fa fa-cog fa-spin"></i>
-					Chargement de la prévisualisation du Job.
+					Chargement de la prévisualisation.
+				</div>
+				<div id="page_loading" class="alert alert-info" role="alert" >
+					<i class="fa fa-cog fa-spin"></i>
+					Chargement de la liste des taches.
 				</div>
 				<div id="preview_picture"></div>
 			</div>
 		</div>
-	</div>
+{% endblock %}
 
-
-	<script src="{{ url_for('static',filename='lib/obj.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/jquery.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/i18next-1.7.2.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/numeral/numeral.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/numeral/numeral.fr.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/handlebars/handlebars.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-helpers.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-util.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/bootstrap/js/bootstrap.min.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/jquery.bootstrap-growl.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/jquery.elevatezoom.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/split-pane/split-pane.js')}}"></script>
-	<script src="{{ url_for('static',filename='lib/jquery.sort.js')}}"></script>
+{% block scripts %}
 	<script>
-		numeral.language('fr');
-
-		function jqEscape(str){
-			return str.replace(/([ !"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g,'\\\\$1');
-		}
 		
 		function loadSpool() {
 			$.getJSON("/spool/list.json", function(data) {
@@ -153,9 +87,10 @@
 						$(this).remove();
 					}
 				}); 
+				$("#page_loading").hide();
 				sortSpool();
-				filterSpool()
-				listResize()
+				filterSpool();
+				listResize();
 			});
 		}
 		var currentsort = "name";
@@ -278,5 +213,4 @@
 			 } */
 		})
 	</script>
-</body>
-</html>
+{% endblock %}

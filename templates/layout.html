@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="{{ url_for('static',filename='img/laser-logo.png')}}" />
+
+<title>Prévisulaiser les taches de découpe laser</title>
+
+<!-- Bootstrap core CSS -->
+<link href="{{ url_for('static',filename='lib/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+<link href="{{ url_for('static',filename='lib/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet">
+
+<!-- split panes -->
+<link href="{{ url_for('static',filename='lib/split-pane/split-pane.css')}}" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
+
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#"> <img alt="Découpe laser" title="Découpe laser" height="24" src="{{ url_for('static',filename='img/laser-logo-inverted.png')}}">
+				</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li class="active"><a href="http://carrefour-numerique.cite-sciences.fr/fablab/wiki/doku.php?id=machines:decoupe_laser:0_utilisation" target="_blank"> <i class="fa fa-life-ring"></i> Aide à l'utilisation de la decoupeuse laser
+					</a></li>
+				</ul>
+
+				<ul class="nav navbar-nav navbar-left">
+					<li class="{{menu.preview}}"><a href="/">Prévisulaiser les taches de découpe</a></li>
+					<li class="{{menu.upload}}"><a href="/upload.html">Envoyer un fichier dans la file d'attente</a></li>
+					<!-- <li><a href="#">Archives</a></li> -->
+				</ul>
+
+			</div>
+		</div>
+	</nav>
+	<div id="main">
+		{% block main %}{% endblock %}
+	</div>
+
+
+	<script src="{{ url_for('static',filename='lib/obj.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/i18next-1.7.2.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/numeral/numeral.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/numeral/numeral.fr.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/moment-with-langs.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-helpers.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/handlebars/handlebars-util.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/bootstrap/js/bootstrap.min.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.bootstrap-growl.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.elevatezoom.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/split-pane/split-pane.js')}}"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.sort.js')}}"></script>
+	<script>
+		numeral.language('fr');
+	
+		function jqEscape(str){
+			return str.replace(/([ !"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g,'\\\\$1');
+		}
+	</script>
+	{% block scripts %}{% endblock %}
+</body>
+</html>

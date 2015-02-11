@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block main %}
+	<div id="" style="position:absolute;top:5em;left:2em; width:450px;">
+		<div id="tsf_info" class="panel panel-default">
+			<div class="panel-heading">Upload de fichier tsf.</div>
+			<div class="panel-body">
+				<div id="upload_output">
+					<em class="text-muted"> Sélectionner un fichier</em>
+					<form action="/upload.json" id="upload_form">
+						<input type="file" name="uploaded_file" />
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="preview_picture_loading" class="alert alert-info" role="alert" >
+		<i class="fa fa-cog fa-spin"></i>
+		Chargement de la prévisualisation.
+	</div>
+	<div id="preview_picture"></div>
+{% endblock %}
+
+{% block scripts %}
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.js"></script>
+	<script src="{{ url_for('static',filename='lib/jquery.fileupload.js')}}" ></script>
+	<script>
+		$(function() {
+			$('#upload_form').fileupload({
+				dataType : 'json',
+				singleFileUploads : true,
+				limitConcurrentUploads : 1,
+				add: function (e, data) {
+					console.log(data.files[0].name, data.files[0].size, data.files[0].type);
+					if(data.files[0].name.endsWith('.tsf')){
+		            $("#upload_output").text('Uploading...');
+		            data.submit();
+					}else{
+						alert('Selectionner un fichier .tsf')
+					}
+		        },
+				done : function(e, data) {
+					console.log(data.result);
+					if(data.error){
+						$("#upload_output").html("erreur");
+					}else{
+						$("#upload_output").render('tsf_info', data.result.tsf)
+						var img_url = [ '/tsf/preview/', data.result.tsf.directory, '/', data.result.tsf.filename, '.svg' ].join("");
+						var img = $([ '<img src="', img_url, '" data-zoom-image=', img_url, ' />' ].join('')).on('load', function() {
+							console.log('loaded', this);
+							$("#preview_picture_loading").hide();
+						}).css({
+							'max-width' : '95%',
+							'max-height' : '99%',
+							'margin' : 'auto'
+						});
+						$("#preview_picture_loading").show();
+						$("#preview_picture").html(img);
+					}
+				}
+			});
+		});
+	</script>
+{% endblock %}

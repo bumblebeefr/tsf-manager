@@ -1,5 +1,6 @@
 body {
 	overflow: hidden;
+	font-size:9pt;
 }
 
 .navbar-brand > img {
@@ -81,6 +82,9 @@ body {
 #preview_picture_loading{
 	margin:25%;	
 	display:none;
+}
+#page_loading{
+	margin:25%;	
 }
 .text-muted{
 	color:#AAA;

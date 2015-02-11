@@ -3,12 +3,14 @@
 from flask import Flask, render_template, jsonify, request, flash, redirect, url_for, session,send_file, Response
 import logging
 import os
+import re
 from os import path
 import tsf
 from sse import Publisher
 from datetime import datetime
 from pyinotify import WatchManager, ThreadedNotifier, ProcessEvent
-import pyinotify
+import pyinotify, shutil
+from werkzeug.utils import secure_filename
 
 HOST = '0.0.0.0'
 PORT = 4242
@@ -16,6 +18,7 @@ from local_settings import *
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'poezrunç_-xqhmdhc:xqhm!,nvuqmvlfugsbl;:*'
+
 
 # publisher = Publisher()
 # wm = WatchManager()
@@ -38,8 +41,43 @@ app.config['SECRET_KEY'] = 'poezrunç_-xqhmdhc:xqhm!,nvuqmvlfugsbl;:*'
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', menu={"preview": "active"})
 
+
+@app.route('/upload.html', methods=['GET'])
+def upload():
+    return render_template('upload.html', menu={"upload": "active"})
+
+
+@app.route('/upload.json',  methods=['POST'])
+def upload_json():
+    f = request.files.get('uploaded_file',None)
+    if f.filename.rsplit('.', 1)[1] == 'tsf':
+        filename = secure_filename(f.filename)
+        filepath = os.path.join(TEMP_DIR, filename)
+        f.save(filepath)
+        try:
+            tsf_file = tsf.TsfFile(filepath)
+            tsf_file.headers()
+            new_filename = filename
+            i = 1
+            while os.path.isfile(os.path.join(SPOOL_DIR, new_filename)):
+                new_filename = re.sub("(_[0-9]+)?\\.tsf$", "_%s.tsf" % i, filename)
+                i += 1
+
+            shutil.move(filepath, os.path.join(SPOOL_DIR, new_filename))
+            tsf_file = tsf.TsfFile(os.path.join(SPOOL_DIR, new_filename))
+            return jsonify(error=False, filetype='tsf', tsf=tsf_file.to_dict())
+        except Exception as e:
+            logging.exception("exception when parsing invalid tsf (%s) : %s", f.filename, e)
+            return jsonify(error=True, invalid_tsf=True)
+        finally:
+            try:
+                os.remove(filepath)
+            except OSError:
+                pass
+        
+        return jsonify(error=True, iunsupported_extention=True)
 
 # @app.route('/msg', methods=['GET'])
 # def msg():
