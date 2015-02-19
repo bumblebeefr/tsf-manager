@@ -49,7 +49,7 @@ def upload():
     return render_template('upload.html', menu={"upload": "active"})
 
 
-@app.route('/upload.json',  methods=['POST'])
+@app.route('/upload.json', methods=['POST'])
 def upload_json():
     f = request.files.get('uploaded_file',None)
     if f.filename.rsplit('.', 1)[1] == 'tsf':
@@ -76,7 +76,7 @@ def upload_json():
                 os.remove(filepath)
             except OSError:
                 pass
-        
+
         return jsonify(error=True, iunsupported_extention=True)
 
 # @app.route('/msg', methods=['GET'])
@@ -101,6 +101,20 @@ def preview_file(preview_path):
     preview = path.join(PREVIEW_DIR, "%s.png" % preview_path)
     return send_file(preview, mimetype="image/jpg")
 
+
+@app.route('/tsf/file/<path:tsf_path>')
+def download_tsf(tsf_path):
+    return send_file(os.path.join(BASE_DIR, tsf_path))
+
+
+@app.route('/tsf/remove/<path:tsf_path>.json')
+def remove_tsf(tsf_path):
+    try:
+        os.remove(os.path.join(BASE_DIR, tsf_path))
+        return jsonify(out="ok")
+    except:
+        logging.exception("Unable to remove file %s" % tsf_path)
+        return jsonify(out="ko")
 
 @app.route('/tsf/preview/<path:tsf_path>.svg')
 def tsf_preview(tsf_path):

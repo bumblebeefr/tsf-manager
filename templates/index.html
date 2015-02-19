@@ -56,7 +56,7 @@
 					var id = name+data.tsf_list[i].checksum;
 					checksums[id] = true;
 					if($("#"+jqEscape(id)).length ==0){
-						var tsf_row = $([ '<tr class="tsf"><td>', name, '(', data.tsf_list[i].sweight, ')', '</td><td width="32"><i class="fa fa-download text-muted"></i> <i class="fa fa-trash text-muted"></i></td></tr>' ].join(""));
+						var tsf_row =$(HandlebarsUtil.render("tsf_row",{id:id,name:name, data : data.tsf_list[i]}))
 						tsf_row.attr('id',id);
 						var icons = $("<td width='32'/>")
 						tsf_row.prepend(icons);
@@ -187,6 +187,25 @@
 				}
 				listResize();
 			});
+			$("#spool_list").on("click", "a.tsf_dl",function(e){
+				e.stopPropagation();
+			});
+			$("#spool_list").on("click", "a.tsf_rm",function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				var data = $(this).parents('.tsf').data("tsf");
+				if(confirm("Suppression de la tache "+data.filename)){
+					$.getJSON(['/tsf/remove/',data.directory, '/', data.filename,'.json'].join(''), function(){
+						loadSpool();
+					});
+				}
+			});
+			$("#spool_list").on("click", "a.tsf_bak",function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				alert('Archivage pas enore en place, désolé !');
+			});
+			
 			$("#sortby").change(function() {
 				sortSpool();
 			});
