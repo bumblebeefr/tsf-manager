@@ -44,6 +44,10 @@
 {% block scripts %}
 	<script>
 		
+		function alphanum(str){
+			return str.replace(/[^A-Za-z0-9_]/g,'_');
+		}
+	
 		function loadSpool() {
 			$.getJSON("/spool/list.json", function(data) {
 				$("#spool_list").html("");
@@ -53,7 +57,7 @@
 					if ('JobName' in data.tsf_list[i].headers) {
 						name = data.tsf_list[i].headers.JobName
 					}
-					var id = name+data.tsf_list[i].checksum;
+					var id = alphanum(name)+data.tsf_list[i].date+data.tsf_list[i].checksum;
 					checksums[id] = true;
 					if($("#"+jqEscape(id)).length ==0){
 						var tsf_row =$(HandlebarsUtil.render("tsf_row",{id:id,name:name, data : data.tsf_list[i]}))
