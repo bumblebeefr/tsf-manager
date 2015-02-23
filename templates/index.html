@@ -45,7 +45,11 @@
 	<script>
 		
 		function alphanum(str){
-			return str.replace(/[^A-Za-z0-9_]/g,'_');
+			if(str){
+				return str.replace(/[^A-Za-z0-9_]/g,'_');
+			}else{
+				return '_';
+			}
 		}
 	
 		function loadSpool() {
